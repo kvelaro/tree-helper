@@ -7,8 +7,8 @@ class TreeHelper {
         return self::$tree;
     }
 
-    public static function isNodeExist($fieldToSearch = 'id', $valueToSearch, $level = 1, $incomingNode = null) {
-        if($level < 0) {
+    public static function isNodeExist($fieldToSearch = 'id', $valueToSearch, $level = -1, $incomingNode = null) {
+        if($level == 0) {
             return false;
         }
         if($incomingNode == null) {
@@ -24,8 +24,13 @@ class TreeHelper {
             if($nodeValue == $valueToSearch) {
                 return true;
             }
-            if(empty($node['children']) == false && $level > 0) {
-                $result = self::isNodeExist($fieldToSearch, $valueToSearch, $level - 1, $node['children']);
+            if(empty($node['children']) == false && ($level > 0 || $level == -1)) {
+                if($level == -1) {
+                    $result = self::isNodeExist($fieldToSearch, $valueToSearch, $level, $node['children']);
+                }
+                else {
+                    $result = self::isNodeExist($fieldToSearch, $valueToSearch, $level - 1, $node['children']);
+                }
                 if($result == true) {
                     return true;
                 }
@@ -188,7 +193,7 @@ class TreeHelper {
 
     public static function getTBNodesPath() {
         throw new Exception('Not implemented', 500);
-    }
+            }
 
     //DFS - Depth first search
     public static function plainItemExistDFS($root = null, $depth = -1) {
@@ -223,7 +228,7 @@ class TreeHelper {
         }
     }
 
-    public static function iterateDS(&$root = null, $parentNode = null, $callback) {
+    public static function iterateDS(&$root = null, $parentNode = null, $callback, $depth = 0) {
         $rootNode = &$root;
         $parentNode = $parentNode;
         if(empty($rootNode) == true) {
@@ -244,13 +249,13 @@ class TreeHelper {
             return;
         }
         foreach ($rootNode as $key => &$node) {
-            $callback($node, $parentNode);
+            $callback($node, $parentNode, $depth);
             if(empty($node) == true) {
                 unset($rootNode[$key]);
                 continue;
             }
             if(empty($node['children']) == false) {
-                self::iterateDS($node['children'], $node['item'], $callback);
+                self::iterateDS($node['children'], $node['item'], $callback, $depth + 1);
             }
         }
         return;
