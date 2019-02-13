@@ -1,7 +1,7 @@
 # TreeHelper
-##Static class used to build tree of parent-child relations
+## Static class used to build tree of parent-child relations
 
-####ex:
+#### ex:
 ```
 TreeHelper::makeTree($rows, 'id', 'parent_id'); //build tree
 $tree = TreeHelper::getTree(); //get tree
