@@ -39,15 +39,19 @@ class TreeHelper {
         return false;
     }
 
-    public static function makeTree($arrayOfObjects, $id = 'id', $parent_id = 'parent_id') {
+    public static function makeTree($arrayOfObjects, $id = 'id', $parent_id = 'parent_id', $trivial = false) {
         self::$tree = [];
         self::$flatNodes = [];
         foreach ($arrayOfObjects as $object) {
+            $item = $object;
+            if($trivial == true) {
+                $item= $object->$id;
+            }
             $leaf = [
                 'item' => $object->$parent_id,
                 'children' => [
                     [
-                        'item' => $object,
+                        'item' => $item,
                         'children' => []
                     ]
                 ]
@@ -71,6 +75,43 @@ class TreeHelper {
         }
     }
 
+    public static function getNode($fieldToSearch = 'id', $valueToSearch, $level = -1, $incomingNode = null, $remove = false) {
+        if($level == 0) {
+            return false;
+        }
+        if($incomingNode == null) {
+            $incomingNode = &self::$tree['children'];
+        }
+        foreach ($incomingNode as $nodeKey => &$node) {
+            if(is_object($node['item'])) {
+                $nodeValue = $node['item']->$fieldToSearch;
+            }
+            else {
+                $nodeValue = $node['item'];
+            }
+            if($nodeValue == $valueToSearch) {
+                if($remove == true) {
+                    $tmpNode = $node;
+                    unset($incomingNode[$nodeKey]);
+                    return $tmpNode;
+                }
+                return $node;
+            }
+            if(empty($node['children']) == false && ($level > 0 || $level == -1)) {
+                if($level == -1) {
+                    $result = self::getNode($fieldToSearch, $valueToSearch, $level, $node['children'], $remove);
+                }
+                else {
+                    $result = self::getNode($fieldToSearch, $valueToSearch, $level - 1, $node['children'], $remove);
+                }
+                if($result != false) {
+                    return $result;
+                }
+            }
+        }
+        return false;
+    }
+
     public static function addLeaf($leaf, $id  = 'id', $parent_id = 'parent_id', &$incomingNode = null) {
         $root = false;
         if($incomingNode == null) {
@@ -83,9 +124,27 @@ class TreeHelper {
                 'children' => []
             ];
         }
-        //if node is with parent, create parent node first
-        if(empty($leaf['item']) == false) {
-            $nodeExist = TreeHelper::isNodeExist($id, $leaf['item']);
+        $leafItemId = null;
+        if (is_object($leaf['item']) == false) {
+            $leafItemId = $leaf['item'];
+        } else {
+            $leafItemId = $leaf['item']->$id;
+        }
+        //plain id with object replacement in parent node
+        if (is_object($leaf['children'][0]['item']) == false) {
+            $leafChildId = $leaf['children'][0]['item'];
+        } else {
+            $leafChildId = $leaf['children'][0]['item']->$id;
+        }
+        //@todo does this code needed?
+        if (is_object($leaf['children'][0]['item']) == false) {
+            $leafParentId = $leaf['item'];
+        } else {
+            $leafParentId = $leaf['children'][0]['item']->$parent_id;
+        }
+        if($root == true && empty($leaf['item']) == false) {
+            //if node is with parent, create parent node first
+            $nodeExist = TreeHelper::isNodeExist($id, $leafItemId);
             //if node does not exist then create it
             if($nodeExist == false) {
                 $parentLeaf = [
@@ -99,37 +158,27 @@ class TreeHelper {
                 ];
                 self::addLeaf($parentLeaf, $id, $parent_id);
             }
+            //try to find child node if it exists
+            $nodeExist = TreeHelper::isNodeExist($id, $leafChildId);
+            if($nodeExist == true) {
+                $existentChildNode = TreeHelper::getNode($id, $leafChildId, -1, null, true);
+                //@todo what if there is more than one children?
+                $leaf['children'][0]['children'] = array_merge($leaf['children'][0]['children'], $existentChildNode['children']);
+            }
         }
         if($root == true) {
             $incomingNode = &self::$tree['children'];
         }
         foreach ($incomingNode as $nodeKey => &$node) {
             $nodeItemId = null;
-            $leafItemId = null;
             if (is_object($node['item']) == false) {
                 $nodeItemId = $node['item'];
             } else {
                 $nodeItemId = $node['item']->$id;
             }
-            if (is_object($leaf['item']) == false) {
-                $leafItemId = $leaf['item'];
-            } else {
-                $leafItemId = $leaf['item']->$id;
-            }
             if($nodeItemId == $leafItemId) {
                 $node['children'] = array_merge($node['children'], $leaf['children']);
                 return true;
-            }
-            //plain id with object replacement in parent node
-            if (is_object($leaf['children'][0]['item']) == false) {
-                $leafChildId = $leaf['children'][0]['item'];
-            } else {
-                $leafChildId = $leaf['children'][0]['item']->$id;
-            }
-            if (is_object($leaf['children'][0]['item']) == false) {
-                $leafParentId = $leaf['children'][0]['item'];
-            } else {
-                $leafParentId = $leaf['children'][0]['item']->$parent_id;
             }
             if($nodeItemId == $leafChildId) {
                 $newNode = [
@@ -226,6 +275,7 @@ class TreeHelper {
                 }
             }
         }
+        return false;
     }
 
     public static function iterateDS(&$root = null, $parentNode = null, $callback, $depth = 0) {
@@ -259,5 +309,9 @@ class TreeHelper {
             }
         }
         return;
+    }
+
+    public static function loadTree($treeObject) {
+        self::$tree = $treeObject;
     }
 }
