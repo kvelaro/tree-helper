@@ -7,6 +7,33 @@ class TreeHelper {
         return self::$tree;
     }
 
+    public static function getArrayTree($root = null, $depth = 0) {
+        $tree = [];
+        if($root == null) {
+            $root = [];
+            if(empty(self::$tree) == false && isset(self::$tree['children']) == true) {
+                $root = self::$tree['children'];
+            }
+        }
+
+        foreach ($root as $node) {
+            $currentLeaf = [
+                'id' => $node['item']->id,
+                'parent_id' => $node['item']->parent_id,
+                'text' => $node['item']->title,
+                'children' => []
+            ];
+            if(empty($node['children']) == false) {
+                $currentLeaf['children'] = self::getArrayTree($node['children'], $depth + 1);
+                $tree[] = $currentLeaf;
+            }
+            else {
+                $tree[] = $currentLeaf;
+            }
+        }
+        return $tree;
+    }
+
     public static function isNodeExist($fieldToSearch = 'id', $valueToSearch, $level = -1, $incomingNode = null) {
         if($level == 0) {
             return false;
@@ -242,7 +269,7 @@ class TreeHelper {
 
     public static function getTBNodesPath() {
         throw new Exception('Not implemented', 500);
-            }
+    }
 
     //DFS - Depth first search
     public static function plainItemExistDFS($root = null, $depth = -1) {
