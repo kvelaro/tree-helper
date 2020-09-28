@@ -2,7 +2,7 @@
 
 namespace Kvelaro\TreeHelper;
 
-class TreeHelper {
+class Tree {
     protected static $tree = [];
     protected static $flatNodes = [];
 
