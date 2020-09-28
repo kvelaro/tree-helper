@@ -1,5 +1,6 @@
 {
     "name": "kvelaro/tree-helper",
+    "version": "1.0.1",
     "description": "Tree helper class for PHP",
     "authors": [
         {
