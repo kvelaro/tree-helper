@@ -1,6 +1,11 @@
 # TreeHelper
 ## Static class used to build tree of parent-child relations
 
+#### install:
+```
+composer require kvelaro/tree-helper
+```
+
 #### ex:
 ```
 TreeHelper::makeTree($rows, 'id', 'parent_id'); //build tree

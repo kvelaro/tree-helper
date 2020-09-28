@@ -1,5 +1,5 @@
 {
-    "name": "velaro/tree-helper",
+    "name": "kvelaro/tree-helper",
     "description": "Tree helper class for PHP",
     "authors": [
         {
@@ -10,7 +10,7 @@
     "require": {},
     "autoload": {
     "psr-4": {
-      "Kvelaro\\": "./src"
+      "Kvelaro\\TreeHelper": "./src"
     }
   }
 }

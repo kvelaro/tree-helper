@@ -1,6 +1,6 @@
 <?php
 
-namespace Kvelaro;
+namespace Kvelaro\TreeHelper;
 
 class TreeHelper {
     protected static $tree = [];
