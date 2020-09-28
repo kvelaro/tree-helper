@@ -1,4 +1,7 @@
 <?php
+
+namespace Kvelaro;
+
 class TreeHelper {
     protected static $tree = [];
     protected static $flatNodes = [];

@@ -1,0 +1,16 @@
+{
+    "name": "velaro/tree-helper",
+    "description": "Tree helper class for PHP",
+    "authors": [
+        {
+            "name": "Kamil Velaro",
+            "email": "kamilvelaro@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+    "psr-4": {
+      "Kvelaro\\": "./src"
+    }
+  }
+}
