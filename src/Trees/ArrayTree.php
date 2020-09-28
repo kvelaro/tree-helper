@@ -1,6 +1,6 @@
 <?php
 
-namespace Kvelaro\trees;
+namespace Kvelaro\TreeHelper\Trees;
 
 class ArrayTree extends AbstractTree implements Treeble
 {
